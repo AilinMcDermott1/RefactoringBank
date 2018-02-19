@@ -57,6 +57,7 @@ public class BankApplication extends JFrame {
 	
 	boolean openValues;
 	
+	
 	public BankApplication() {
 		
 		super("Bank Application");
