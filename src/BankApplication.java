@@ -1,4 +1,3 @@
-
 import javax.swing.table.DefaultTableModel;
 
 import java.io.*;
@@ -16,24 +15,23 @@ public class BankApplication extends JFrame {
 	private final static int TABLE_SIZE = 29;
 	static private final String newline = "\n";
 	
-	JMenuBar menuBar;
-	JMenu navigateMenu, recordsMenu, transactionsMenu, fileMenu, exitMenu;
-	JMenuItem nextItem, prevItem, firstItem, lastItem, findByAccount, findBySurname, listAll;
-	JMenuItem createItem, modifyItem, deleteItem, setOverdraft, setInterest;
-	JMenuItem deposit, withdraw, calcInterest;
-	JMenuItem open, save, saveAs;
-	JMenuItem closeApp;
-	JButton firstItemButton, lastItemButton, nextItemButton, prevItemButton;
-	JLabel accountIDLabel, accountNumberLabel, firstNameLabel, surnameLabel, accountTypeLabel, balanceLabel, overdraftLabel;
-	JTextField accountIDTextField, accountNumberTextField, firstNameTextField, surnameTextField, accountTypeTextField, balanceTextField, overdraftTextField;
-	static JFileChooser fc;
-	JTable jTable;
-	double interestRate;
+	private JMenuBar menuBar;
+	private JMenu navigateMenu, recordsMenu, transactionsMenu, fileMenu, exitMenu;
+	private JMenuItem nextItem, prevItem, firstItem, lastItem, findByAccount, findBySurname, listAll;
+	private JMenuItem createItem, modifyItem, deleteItem, setOverdraft, setInterest;
+	private JMenuItem deposit, withdraw, calcInterest;
+	private JMenuItem open, save, saveAs, closeApp;
+	private JButton firstItemButton, lastItemButton, nextItemButton, prevItemButton;
+	private JLabel accountIDLabel, accountNumberLabel, firstNameLabel, surnameLabel, accountTypeLabel, balanceLabel, overdraftLabel;
+	private JTextField accountIDTextField, accountNumberTextField, firstNameTextField, surnameTextField, accountTypeTextField, balanceTextField, overdraftTextField;
+	private static JFileChooser fc;
+	private JTable jTable;
+	private double interestRate;
 	
-	int currentItem = 0;
+	private int currentItem = 0;
 	
 	
-	boolean openValues;
+	private boolean openValues;
 	
 	
 	public BankApplication() {
@@ -102,7 +100,7 @@ public class BankApplication extends JFrame {
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
 
 		nextItemButton = new JButton(new ImageIcon("next.png"));
-		prevItemButton = new JButton(new ImageIcon("previous.png"));
+		prevItemButton = new JButton(new ImageIcon("prev.png"));
 		firstItemButton = new JButton(new ImageIcon("first.png"));
 		lastItemButton = new JButton(new ImageIcon("last.png"));
 		
@@ -212,20 +210,6 @@ public class BankApplication extends JFrame {
 			}
 		};
 		
-		ActionListener next = new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				saveOpenValues();
-				// No next if at end of list.
-				if (currentItem != (table.size()-1)) {
-					// Move to next item.
-						currentItem++;
-					while(!table.containsKey(currentItem) ){
-						currentItem++;
-					}
-					displayDetails(currentItem);			
-				}				
-			}
-		};
 		
 		ActionListener next1 = new ActionListener(){
 			public void actionPerformed(ActionEvent e){
@@ -354,7 +338,7 @@ public class BankApplication extends JFrame {
 			public void actionPerformed(ActionEvent e){
 		
 				JFrame frame = new JFrame("TableDemo");
-				JPanel pan = new JPanel();
+//				JPanel pan = new JPanel();
 			
 		        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				String col[] = {"ID","Number","Name", "Account Type", "Balance", "Overdraft"};
@@ -498,36 +482,22 @@ public class BankApplication extends JFrame {
 		withdraw.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				String accNum = JOptionPane.showInputDialog("Account number to withdraw from: ");
-				String toWithdraw = JOptionPane.showInputDialog("Account found, Enter Amount to Withdraw: ");
-				boolean found;
+				boolean found = false;
 				
 				for (Map.Entry<Integer, BankAccount> entry : table.entrySet()) {
-					
-
 					if(accNum.equals(entry.getValue().getAccountNumber().trim())){
-						
 						found = true;
-						
-						if(entry.getValue().getAccountType().trim().equals("Current")){
-							if(Double.parseDouble(toWithdraw) > entry.getValue().getBalance() + entry.getValue().getOverdraft())
-								JOptionPane.showMessageDialog(null, "Transaction exceeds overdraft limit");
-							else{
-								entry.getValue().setBalance(entry.getValue().getBalance() - Double.parseDouble(toWithdraw));
-								displayDetails(entry.getKey());
-							}
-						}
-						else if(entry.getValue().getAccountType().trim().equals("Deposit")){
-							if(Double.parseDouble(toWithdraw) <= entry.getValue().getBalance()){
-								entry.getValue().setBalance(entry.getValue().getBalance()-Double.parseDouble(toWithdraw));
-								displayDetails(entry.getKey());
-							}
-							else
-								JOptionPane.showMessageDialog(null, "Insufficient funds.");
-						}
-					}					
+						String toWithdraw = JOptionPane.showInputDialog("Account found, Enter Amount to Withraw: ");
+						entry.getValue().setBalance(entry.getValue().getBalance() - Double.parseDouble(toWithdraw));
+						displayDetails(entry.getKey());
+						//balanceTextField.setText(entry.getValue().getBalance()+"");
+					}
 				}
+				if (!found)
+					JOptionPane.showMessageDialog(null, "Account number " + accNum + " not found.");
 			}
 		});
+		
 		
 		calcInterest.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
@@ -571,7 +541,7 @@ public class BankApplication extends JFrame {
 	
 	private static RandomAccessFile input;
 	private static RandomAccessFile output;
-	private static final int NUMBER_RECORDS = 100;
+//	private static final int NUMBER_RECORDS = 100;
 
 	
 	public static void openFileRead()
@@ -583,7 +553,7 @@ public class BankApplication extends JFrame {
 		int returnVal = fc.showOpenDialog(null);
 		 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
+//            File file = fc.getSelectedFile();
 
         } else {
                 }
@@ -602,24 +572,7 @@ public class BankApplication extends JFrame {
 	   } // end method openFile
 	
 	static String fileToSaveAs = "";
-	
-	public static void openFileWrite()
-	   {
-		if(fileToSaveAs!=""){
-	      try // open file
-	      {
-	         output = new RandomAccessFile( fileToSaveAs, "rw" );
-	         JOptionPane.showMessageDialog(null, "Accounts saved to " + fileToSaveAs);
-	      } // end try
-	      catch ( IOException ioException )
-	      {
-	    	  JOptionPane.showMessageDialog(null, "File does not exist.");
-	      } // end catch
-		}
-		else
-			saveToFileAs();
-	   }
-	
+
 	public static void saveToFileAs()
 	   {
 		
@@ -719,7 +672,7 @@ public static void saveToFile(){
 	
 		RandomAccessBankAccount record = new RandomAccessBankAccount();
 	
-	      Scanner input = new Scanner( System.in );
+//	      Scanner input = new Scanner( System.in );
 
 	      
 	      for (Map.Entry<Integer, BankAccount> entry : table.entrySet()) {
@@ -746,9 +699,7 @@ public static void saveToFile(){
 	}
 
 	public static void writeFile(){
-		openFileWrite();
 		saveToFile();
-		//addRecords();
 		closeFile();
 	}
 	

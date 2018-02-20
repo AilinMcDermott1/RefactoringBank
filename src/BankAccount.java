@@ -20,12 +20,7 @@ public class BankAccount {
 		this.balance = balance;
 		this.overdraft = overdraft;
 	}
-	
-	public BankAccount(){
-		this(0, "", "", "", "", 0.0, 0.0);
-	}
-	
-	
+
 	
 	public int getAccountID() {
 		return accountID;
@@ -59,13 +54,6 @@ public class BankAccount {
 		this.accountType = accountType;
 	}
 	
-	public void setAccType(String accType){
-		accType = accType;
-	}
-	
-	public String getAccType(){
-		return accountType;
-	}
 	
 	public String getFirstName() {
 		return firstName;
