@@ -27,41 +27,23 @@ public class CreateBankDialog extends JFrame {
 		}
 		table.put(hash, value);
 	}
-	
-	
-	
-	
-	// Constructor code based on that for the Create and Edit dialog classes in the Shapes exercise.
 
 	JLabel accountIDLabel, accountNumberLabel, firstNameLabel, surnameLabel, accountTypeLabel, balanceLabel, overdraftLabel;
-	
-	
 	JComboBox comboBox;
 	JTextField accountNumberTextField;
 	final JTextField firstNameTextField, surnameTextField, accountTypeTextField, balanceTextField, overdraftTextField;
 	
 	CreateBankDialog(HashMap<Integer, BankAccount> accounts) {
 		
-		super("Add Bank Details");
-		
+		super("Add Bank Details");	
 		table = accounts;
-		
 		setLayout(new BorderLayout());
-		
 		JPanel dataPanel = new JPanel(new MigLayout());
-		
-		
-		
-		
-		
-		
-		
 		String[] comboTypes = {"Current", "Deposit"};
-		
 		final JComboBox comboBox = new JComboBox(comboTypes);
 		
 		accountNumberLabel = new JLabel("Account Number: ");
-		accountNumberTextField = new JTextField(15);
+		accountNumberTextField = new JTextField(8);
 		accountNumberTextField.setEditable(true);
 		
 		dataPanel.add(accountNumberLabel, "growx, pushx");
@@ -116,22 +98,14 @@ public class CreateBankDialog extends JFrame {
 		add(buttonPanel, BorderLayout.SOUTH);
 		
 		addButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				
+			public void actionPerformed(ActionEvent e) {	
 				
 				String accountNumber = accountNumberTextField.getText();
-				
-				
-							
-				
 				String surname = surnameTextField.getText();
 				String firstName = firstNameTextField.getText();
-			
 				String accountType = comboBox.getSelectedItem().toString();
-				
-		
-				if (accountNumber != null && accountNumber.length()==8 && surname != null && firstName != null && accountType != null) {
+
+				if (accountNumber != null && accountNumber.length()==8 && !surname.isEmpty() && !firstName.isEmpty() && accountType != null) {
 					try {
 						
 						boolean accNumTaken=false;
@@ -153,15 +127,11 @@ public class CreateBankDialog extends JFrame {
 							 }
 						
 						if(!accNumTaken){
-						
-						
+
 							BankAccount account = new BankAccount(randNumber, accountNumber, surname, firstName, accountType, 0.0, 0.0);
 						
-							
 							int key = Integer.parseInt(account.getAccountNumber());
-							
 							int hash = (key%TABLE_SIZE);
-							
 							while(table.containsKey(hash)){
 								hash = hash+1;
 							}
@@ -189,9 +159,5 @@ public class CreateBankDialog extends JFrame {
 		setSize(400,800);
 		pack();
 		setVisible(true);
-
-	}
-	
-	
-	
+	}	
 }

@@ -1,26 +1,30 @@
 import javax.swing.table.DefaultTableModel;
 
-import java.io.*;
 import java.awt.*;
 import java.util.*;
 import javax.swing.*; 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.RandomAccessFile;
+
 import net.miginfocom.swing.MigLayout;
 
 public class BankApplication extends JFrame {
 	
+	static  JFileChooser fc;
+	static  RandomAccessFile input;
+	static  RandomAccessFile output;
+	
 	ArrayList<BankAccount> accountList = new ArrayList<BankAccount>();
 	static HashMap<Integer, BankAccount> table = new HashMap<Integer, BankAccount>();
 	final static int TABLE_SIZE = 29;
-	static private final String newline = "\n";
+//	static private final String newline = "\n";
 	
 	JMenuBar menuBar;
 	JMenu navigateMenu, recordsMenu, transactionsMenu, fileMenu, exitMenu;
 	JMenuItem nextItem, prevItem, firstItem, lastItem, findByAccount, findBySurname, listAll;
-	JMenuItem createItem, modifyItem, deleteItem, setOverdraft, setInterest, deposit, withdraw, calcInterest, open, save, saveAs, closeApp;
-//	private JMenuItem deposit, withdraw, calcInterest, open, save, saveAs, closeApp;
-//	private JMenuItem open, save, saveAs, closeApp;
+	JMenuItem createItem, modifyItem, deleteItem, setOverdraft, setInterest;
+	JMenuItem deposit, withdraw, calcInterest, open, save, saveAs, closeApp;
 	JButton firstItemButton, lastItemButton, nextItemButton, prevItemButton;
 	JLabel accountIDLabel, accountNumberLabel, firstNameLabel, surnameLabel, accountTypeLabel, balanceLabel, overdraftLabel;
 	JTextField accountIDTextField;
@@ -43,7 +47,6 @@ public class BankApplication extends JFrame {
 		
 		super("Bank Application");
 		
-		int currentItem;
 		initComponents();
 	}
 	
@@ -343,9 +346,6 @@ public class BankApplication extends JFrame {
 			public void actionPerformed(ActionEvent e){
 		
 				JFrame frame = new JFrame("TableDemo");
-//				JPanel pan = new JPanel();
-			
-		        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				String col[] = {"ID","Number","Name", "Account Type", "Balance", "Overdraft"};
 				
 				DefaultTableModel tableModel = new DefaultTableModel(col, 0);
@@ -372,7 +372,7 @@ public class BankApplication extends JFrame {
 		
 		open.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				readFile();
+				BankFiles.readFile();
 				currentItem=0;
 				while(!table.containsKey(currentItem)){
 					currentItem++;
@@ -383,13 +383,13 @@ public class BankApplication extends JFrame {
 		
 		save.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				writeFile();
+				BankFiles.writeFile();
 			}
 		});
 		
 		saveAs.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				saveFileAs();
+				BankFiles.saveFileAs();
 			}
 		});
 		
@@ -398,7 +398,7 @@ public class BankApplication extends JFrame {
 				
 				int answer = JOptionPane.showConfirmDialog(BankApplication.this, "Do you want to save before quitting?");
 				if (answer == JOptionPane.YES_OPTION) {
-					saveFileAs();
+					BankFiles.saveFileAs();
 					dispose();
 				}
 				else if(answer == JOptionPane.NO_OPTION)
@@ -469,37 +469,70 @@ public class BankApplication extends JFrame {
 			public void actionPerformed(ActionEvent e){
 				String accNum = JOptionPane.showInputDialog("Account number to deposit into: ");
 				boolean found = false;
+				if(accNum!=null){
+				
 				
 				for (Map.Entry<Integer, BankAccount> entry : table.entrySet()) {
 					if(accNum.equals(entry.getValue().getAccountNumber().trim())){
 						found = true;
 						String toDeposit = JOptionPane.showInputDialog("Account found, Enter Amount to Deposit: ");
-						entry.getValue().setBalance(entry.getValue().getBalance() + Double.parseDouble(toDeposit));
-						displayDetails(entry.getKey());
-						//balanceTextField.setText(entry.getValue().getBalance()+"");
+						if(toDeposit!=null) {
+							
+						
+							if (Double.parseDouble(toDeposit)<0) {
+								JOptionPane.showMessageDialog(null, "Can't deposit a negative amount.");
+							}
+							else {
+								
+						
+							entry.getValue().setBalance(entry.getValue().getBalance() + Double.parseDouble(toDeposit));
+							displayDetails(entry.getKey());
+							}
+						} else {
+							displayDetails(entry.getKey());
+						}
 					}
 				}
 				if (!found)
 					JOptionPane.showMessageDialog(null, "Account number " + accNum + " not found.");
 			}
+		else{
+			displayDetails(currentItem);
+			}
+		}
 		});
 		
 		withdraw.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				String accNum = JOptionPane.showInputDialog("Account number to withdraw from: ");
 				boolean found = false;
+				if(accNum!=null) {
 				
 				for (Map.Entry<Integer, BankAccount> entry : table.entrySet()) {
 					if(accNum.equals(entry.getValue().getAccountNumber().trim())){
 						found = true;
 						String toWithdraw = JOptionPane.showInputDialog("Account found, Enter Amount to Withraw: ");
-						entry.getValue().setBalance(entry.getValue().getBalance() - Double.parseDouble(toWithdraw));
-						displayDetails(entry.getKey());
-						//balanceTextField.setText(entry.getValue().getBalance()+"");
+						if(toWithdraw!=null) {
+							
+							if (Double.parseDouble(toWithdraw)<0) {
+								JOptionPane.showMessageDialog(null, "Can't deposit a negative amount.");
+							}
+							else {
+								entry.getValue().setBalance(entry.getValue().getBalance() - Double.parseDouble(toWithdraw));
+								displayDetails(entry.getKey());
+
+							}
+						} else{
+							displayDetails(entry.getKey());
+						}
 					}
 				}
 				if (!found)
 					JOptionPane.showMessageDialog(null, "Account number " + accNum + " not found.");
+			}
+			 else{
+				displayDetails(currentItem);
+			 }
 			}
 		});
 		
@@ -510,7 +543,6 @@ public class BankApplication extends JFrame {
 					if(entry.getValue().getAccountType().equals("Deposit")){
 						double equation = 1 + ((interestRate)/100);
 						entry.getValue().setBalance(entry.getValue().getBalance()*equation);
-						//System.out.println(equation);
 						JOptionPane.showMessageDialog(null, "Balances Updated");
 						displayDetails(entry.getKey());
 					}
@@ -544,23 +576,6 @@ public class BankApplication extends JFrame {
 	
 	}
 
-
-	public static void writeFile(){
-		BankFiles.saveToFile();
-		BankFiles.closeFile();
-	}
-	
-	public static void saveFileAs(){
-		BankFiles.saveToFileAs();
-		BankFiles.saveToFile();	
-		BankFiles.closeFile();
-	}
-	
-	public static void readFile(){
-		BankFiles.openFileRead();
-		BankFiles.readRecords();
-		BankFiles.closeFile();		
-	}
 	
 	public void put(int key, BankAccount value){
 		int hash = (key%TABLE_SIZE);
